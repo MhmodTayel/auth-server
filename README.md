@@ -1,98 +1,562 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🔐 Auth Server API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> A modern, production-ready authentication backend built with NestJS, MongoDB, and TypeScript. Featuring comprehensive testing, CI/CD automation, and Docker containerization.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+[![Tests](https://img.shields.io/badge/tests-66%20passing-success)](.)
+[![Coverage](https://img.shields.io/badge/coverage-62.84%25-yellow)](.)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](.)
+[![Node](https://img.shields.io/badge/node-18%20%7C%2020-green)](.)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🎯 Overview
 
-## Project setup
+This backend provides a complete authentication solution with user management, JWT-based security, and RESTful APIs. Built following SOLID principles and industry best practices for scalability and maintainability.
 
-```bash
-$ npm install
+### What's Inside
+
+```
+Authentication   →  JWT tokens, bcrypt hashing, secure sessions
+User Management  →  Profile CRUD, password changes, email validation
+API Docs        →  Interactive Swagger UI with live testing
+Security        →  Helmet, CORS, rate limiting, input validation
+Logging         →  Pino structured logging with request tracking
+Testing         →  42 unit + 24 E2E tests with 62.84% coverage
+CI/CD           →  GitHub Actions with automated testing & builds
+Deployment      →  Docker + Docker Compose for easy deployment
 ```
 
-## Compile and run the project
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+Node.js  ≥ 18.x
+MongoDB  ≥ 7.x
+npm      ≥ 9.x
 ```
 
-## Run tests
+### Installation
+
+**Option 1: Local Development**
 
 ```bash
-# unit tests
-$ npm run test
+# 1. Clone and install
+git clone <your-repo>
+cd auth-server
+npm install
 
-# e2e tests
-$ npm run test:e2e
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your settings
 
-# test coverage
-$ npm run test:cov
+# 3. Start MongoDB
+# Ensure MongoDB is running on localhost:27017
+
+# 4. Launch the app
+npm run start:dev
+
+# ✅ API ready at http://localhost:3000/api/v1
+# 📚 Docs ready at http://localhost:3000/api/v1/docs
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+**Option 2: Docker (Recommended)**
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Start everything (API + MongoDB)
+npm run docker:dev
+
+# That's it! 🎉
+# API: http://localhost:3000/api/v1
+# Docs: http://localhost:3000/api/v1/docs
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 🔧 Configuration
 
-Check out a few resources that may come in handy when working with NestJS:
+### Environment Variables
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Create a `.env` file with these values:
 
-## Support
+```bash
+# Server
+NODE_ENV=development          # development | production | test
+PORT=3000                     # API port
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Database
+MONGO_URI=mongodb://localhost:27017/auth-dev
 
-## Stay in touch
+# Security
+JWT_SECRET=min-32-chars-secret-key-change-in-production
+JWT_EXPIRES_IN=7d            # Token lifetime: 1d, 7d, 24h, etc.
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+> **⚠️ Production Note**: `JWT_SECRET` must be minimum 32 characters in production environment
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📡 API Reference
+
+### Base URL
+
+```
+http://localhost:3000/api/v1
+```
+
+### Endpoints Overview
+
+| Endpoint             | Method | Auth | Description       |
+| -------------------- | ------ | ---- | ----------------- |
+| `/`                  | GET    | No   | Health check      |
+| `/auth/signup`       | POST   | No   | Register new user |
+| `/auth/signin`       | POST   | No   | Login user        |
+| `/users/me`          | GET    | Yes  | Get profile       |
+| `/users/me`          | PATCH  | Yes  | Update profile    |
+| `/users/me/password` | PATCH  | Yes  | Change password   |
+
+### 📖 Interactive Documentation
+
+Visit **`http://localhost:3000/api/v1/docs`** for Swagger UI with:
+
+- Live API testing
+- Request/response schemas
+- Authentication examples
+- Error codes reference
+
+### Quick Examples
+
+<details>
+<summary><b>Signup</b></summary>
+
+```bash
+POST /api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "name": "John Doe",
+  "password": "SecurePass123!"
+}
+
+# Response 201
+{
+  "access_token": "eyJhbGciOiJIUz...",
+  "user": {
+    "id": "...",
+    "email": "user@example.com",
+    "name": "John Doe"
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Signin</b></summary>
+
+```bash
+POST /api/v1/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+
+# Response 200
+{
+  "access_token": "eyJhbGciOiJIUz...",
+  "user": { ... }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Get Profile</b></summary>
+
+```bash
+GET /api/v1/users/me
+Authorization: Bearer <your-token>
+
+# Response 200
+{
+  "id": "...",
+  "email": "user@example.com",
+  "name": "John Doe",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Update Profile</b></summary>
+
+```bash
+PATCH /api/v1/users/me
+Authorization: Bearer <your-token>
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Change Password</b></summary>
+
+```bash
+PATCH /api/v1/users/me/password
+Authorization: Bearer <your-token>
+Content-Type: application/json
+
+{
+  "currentPassword": "SecurePass123!",
+  "newPassword": "NewSecure456!"
+}
+```
+
+</details>
+
+---
+
+## 🐳 Docker Deployment
+
+### Development Mode
+
+```bash
+# Start with hot reload
+npm run docker:dev
+
+# View logs
+docker compose -f docker-compose.dev.yml logs -f
+
+# Stop
+npm run docker:dev:down
+```
+
+### Production Mode
+
+```bash
+# Build and start
+npm run docker:prod
+
+# Stop
+npm run docker:prod:down
+
+# Clean up volumes
+npm run docker:clean
+```
+
+### What's Running?
+
+- **Backend**: `localhost:3000` (Node.js app)
+- **MongoDB**: `localhost:27017` (Database)
+- **Health Check**: Automatic container monitoring
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test                    # Unit tests
+npm run test:e2e           # E2E tests
+npm run test:cov           # With coverage report
+
+# Watch mode
+npm run test:watch
+```
+
+### Test Results
+
+```
+✅ Unit Tests:  42 passing (6 suites)
+✅ E2E Tests:   24 passing (2 suites)
+✅ Total:       66 tests
+📊 Coverage:    62.84%
+```
+
+**Coverage by Module:**
+
+- Controllers: `100%`
+- Services: `90%+`
+- DTOs: `100%`
+- Guards: `100%`
+
+---
+
+## 🔒 Security Features
+
+### Authentication
+
+- ✅ JWT-based stateless authentication
+- ✅ Bcrypt password hashing (10 salt rounds)
+- ✅ Token expiration with configurable lifetime
+- ✅ Bearer token authorization
+
+### Password Policy
+
+Enforced password requirements:
+
+- Minimum 8 characters
+- At least 1 letter
+- At least 1 number
+- At least 1 special character (`!@#$%^&*`)
+
+### API Protection
+
+- ✅ **Helmet** - Security headers (XSS, clickjacking)
+- ✅ **CORS** - Cross-origin resource sharing
+- ✅ **Rate Limiting** - 100 req/min (default), 10 req/min (auth endpoints)
+- ✅ **Input Validation** - Class-validator with DTOs
+- ✅ **Error Handling** - Global exception filter
+
+### Production Hardening
+
+- ✅ Environment variable validation
+- ✅ Non-root Docker user
+- ✅ Password excluded from API responses
+- ✅ Structured logging (no sensitive data)
+- ✅ API versioning (`/api/v1`)
+
+---
+
+## 🏗️ Architecture
+
+```
+src/
+├── auth/                    # Authentication Module
+│   ├── decorators/          # @CurrentUser() decorator
+│   ├── dto/                 # SigninDto
+│   ├── guards/              # JwtAuthGuard
+│   ├── strategies/          # Passport JWT strategy
+│   ├── auth.controller.ts   # Signup/signin endpoints
+│   ├── auth.service.ts      # Authentication logic
+│   └── auth.module.ts
+│
+├── users/                   # User Module
+│   ├── dto/                 # CreateUser, UpdateUser, ChangePassword
+│   ├── entities/            # User schema (Mongoose)
+│   ├── users.controller.ts  # Profile management endpoints
+│   ├── users.service.ts     # User business logic
+│   └── users.module.ts
+│
+├── common/                  # Shared Resources
+│   └── filters/             # Global exception filter
+│
+├── config/                  # Configuration
+│   ├── config.ts            # Type-safe config
+│   └── env.validation.ts    # Startup validation
+│
+├── app.module.ts            # Root module
+└── main.ts                  # Application bootstrap
+```
+
+---
+
+## ⚙️ Development
+
+### Available Scripts
+
+```bash
+npm run start:dev           # Development mode (hot reload)
+npm run start:debug         # Debug mode (port 9229)
+npm run start:prod          # Production mode
+npm run build               # Build for production
+npm run lint                # ESLint
+npm run format              # Prettier
+npm test                    # Run tests
+npm run docker:dev          # Docker development
+npm run docker:prod         # Docker production
+```
+
+### Code Quality Tools
+
+- **ESLint** - Code linting with TypeScript rules
+- **Prettier** - Code formatting
+- **Husky** - Git hooks (pre-commit, commit-msg)
+- **Lint-staged** - Run linters on staged files
+- **Commitlint** - Conventional commit messages
+
+### Git Hooks
+
+**Pre-commit**: Automatically formats and lints staged files
+
+**Commit-msg**: Validates commit message format
+
+```
+feat: add new feature
+fix: resolve bug
+docs: update documentation
+test: add tests
+chore: update dependencies
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+Runs automatically on push/PR:
+
+1. **Linting** ✨
+   - ESLint code quality
+   - Prettier formatting check
+   - Commit message validation
+
+2. **Unit Tests** 🧪
+   - Run on Node 18.x & 20.x
+   - Generate coverage reports
+   - Upload to Codecov
+
+3. **E2E Tests** 🔗
+   - MongoDB container setup
+   - Full integration testing
+   - Real database operations
+
+4. **Build** 📦
+   - TypeScript compilation
+   - Production build verification
+   - Artifact creation
+
+All jobs must pass before merging ✅
+
+---
+
+## 📊 Monitoring
+
+### Logging
+
+**Development**: Pretty-printed, colorized console logs
+
+**Production**: JSON structured logs for log aggregation
+
+**Features**:
+
+- Request/response logging
+- Error tracking with stack traces
+- No sensitive data exposure
+- Correlation IDs for request tracing
+
+### Health Checks
+
+- **HTTP**: `GET /api/v1` returns `200 OK` with timestamp
+- **Docker**: Built-in container health monitoring
+- **Database**: Connection verification on startup
+
+---
+
+## 🚢 Production Deployment
+
+### Checklist
+
+- [ ] Set strong `JWT_SECRET` (min 32 characters)
+- [ ] Configure MongoDB authentication
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure CORS for your domain
+- [ ] Set `NODE_ENV=production`
+- [ ] Review rate limits
+- [ ] Set up log aggregation
+- [ ] Configure monitoring/alerts
+- [ ] Back up database regularly
+
+### Scaling
+
+This application is **stateless** and **horizontally scalable**:
+
+- Deploy multiple instances behind a load balancer
+- JWT tokens eliminate session storage
+- MongoDB supports replica sets & sharding
+- Consider Redis for caching (optional)
+
+---
+
+## 🤝 Contributing
+
+### Workflow
+
+1. Fork the repo
+2. Create a branch: `git checkout -b feat/your-feature`
+3. Commit with conventional format: `git commit -m "feat: your feature"`
+4. Push: `git push origin feat/your-feature`
+5. Open a Pull Request
+
+### Standards
+
+- ✅ Follow ESLint/Prettier rules
+- ✅ Write tests (maintain 60%+ coverage)
+- ✅ Use conventional commits
+- ✅ Update docs if needed
+- ✅ Ensure CI passes
+
+---
+
+## 🐛 Troubleshooting
+
+**MongoDB Connection Failed**
+
+```bash
+# Check if MongoDB is running
+docker ps | grep mongo
+# Start MongoDB
+docker compose up mongodb -d
+```
+
+**Port 3000 Already in Use**
+
+```bash
+# Find and kill the process
+lsof -i :3000
+kill -9 <PID>
+```
+
+**Tests Failing**
+
+```bash
+# Clear cache
+npm run test -- --clearCache
+# Run again
+npm test
+```
+
+**Husky Not Working**
+
+```bash
+# Reinstall hooks
+npm run prepare
+```
+
+---
+
+## 📝 License
+
+This project is **UNLICENSED**
+
+---
+
+## 🙏 Acknowledgments
+
+Built with:
+
+- [NestJS](https://nestjs.com/) - Progressive Node.js framework
+- [MongoDB](https://www.mongodb.com/) - Document database
+- [Passport](http://www.passportjs.org/) - Authentication middleware
+- [Swagger](https://swagger.io/) - API documentation
+- [Docker](https://www.docker.com/) - Containerization
+
+---
+
+<div align="center">
+
+**Made with ❤️ and TypeScript**
+
+</div>
