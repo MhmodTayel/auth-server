@@ -5,38 +5,43 @@ import {
   Body,
   Request,
   HttpCode,
-  HttpStatus,
+  HttpStatus,  
+  UseGuards,
+
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard) 
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async getProfile(@Request() req) {
-    const userId = req.user?.id; // From JWT token //TODO
+  async getProfile(@CurrentUser() user) {
+    const userId = user?.id; 
     return this.usersService.findOne(userId);
   }
 
   @Patch('me')
   async updateProfile(
-    @Request() req,
+    @CurrentUser() user,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const userId = req.user?.id; // From JWT token //TODO
+    const userId = user?.id; 
     return this.usersService.update(userId, updateUserDto);
   }
 
   @Patch('me/password')
   @HttpCode(HttpStatus.OK)
   async changePassword(
-    @Request() req,
+    @CurrentUser() user,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const userId = req.user?.id; // From JWT token //TODO
+    const userId = user?.id; 
     return this.usersService.changePassword(userId, changePasswordDto);
   }
 }

@@ -53,7 +53,10 @@ export class UsersService {
     try {
       const query = this.userModel.findOne({ email: email.toLowerCase() });
 
-      if (!options.includePassword) {
+
+      if (options.includePassword) {
+        query.select('+password');
+      } else {
         query.select('-password');
       }
       const user = await query.exec();
