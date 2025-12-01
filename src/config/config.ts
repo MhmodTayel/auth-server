@@ -7,6 +7,7 @@ interface DatabaseConfig {
 
 export interface AppConfig {
   port: number | string;
+  nodeEnv: string;
 }
 
 export interface JwtConfig {
@@ -27,6 +28,8 @@ export default registerAs('', (): Config => {
     },
     app: {
       port: parseInt(process.env.PORT || '3000', 10),
+      nodeEnv: process.env.NODE_ENV || 'development',
+
     },
     jwt: {
       secret: process.env.JWT_SECRET || 'strong-jwt-secret',

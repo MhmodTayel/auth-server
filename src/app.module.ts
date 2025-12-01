@@ -6,9 +6,45 @@ import config, { Config } from './config/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-
+import { LoggerModule } from 'nestjs-pino';
 @Module({
   imports: [
+    LoggerModule.forRootAsync({
+      useFactory: async (configService: ConfigService<Config>) => {
+        const appConfig = configService.get('app')
+        const isProduction = appConfig.nodeEnv === 'production';
+
+
+        return {
+          pinoHttp: {
+            transport: isProduction
+              ? undefined 
+              : {
+                target: 'pino-pretty',
+                options: {
+                  colorize: true,
+                  levelFirst: true,
+                  translateTime: 'yyyy-mm-dd HH:MM:ss',
+                  ignore: 'pid,hostname',
+                  singleLine: false,
+                },
+              },
+            level: isProduction ? 'info' : 'debug',
+            serializers: {
+              req: (req) => ({
+                id: req.id,
+                method: req.method,
+                url: req.url,
+              }),
+              res: (res) => ({
+                statusCode: res.statusCode,
+              }),
+            },
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],

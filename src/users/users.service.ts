@@ -12,11 +12,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
+import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectPinoLogger(UsersService.name) 
+    private readonly logger: PinoLogger,
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -35,12 +38,15 @@ export class UsersService {
 
     await user.save();
 
+    this.logger.info({ userId: user._id, email: user.email }, 'User created successfully');
+
     return this.userModel.findById(user._id).select('-password').exec() as Promise<User>;
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findById(id).select('-password').exec();
     if (!user) {
+      this.logger.warn({ userId: id }, 'User not found');
       throw new NotFoundException('User not found');
     }
     return user;
@@ -62,6 +68,7 @@ export class UsersService {
       const user = await query.exec();
       return user;
     } catch (error) {
+      this.logger.error({ error, email }, 'Error finding user by email');
       throw error;
     }
   }
@@ -94,6 +101,7 @@ export class UsersService {
     const user = await this.userModel.findById(userId).select('+password').exec();
 
     if (!user) {
+      this.logger.warn({ userId }, 'Password change failed: User not found');
       throw new NotFoundException('User not found');
     }
 
