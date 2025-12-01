@@ -32,7 +32,7 @@ export default registerAs('', (): Config => {
 
     },
     jwt: {
-      secret: process.env.JWT_SECRET || 'strong-jwt-secret',
+      secret: process.env.JWT_SECRET || 'strong-jwt-secret-edwr543d5fds3axv',
       expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     },
   };
