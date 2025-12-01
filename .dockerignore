@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+dist
+coverage
+.env
+.git
+.github
+.husky
+*.md
+.eslintrc.js
+.prettierrc
+test
+*.spec.ts
+.vscode
+.idea
