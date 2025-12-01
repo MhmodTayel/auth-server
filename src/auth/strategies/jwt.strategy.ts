@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService<Config>,
     private usersService: UsersService,
   ) {
-    const jwtConfig = configService.get('jwt', { infer: true });
+    const jwtConfig = configService.get('jwt', { infer: true })!;
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

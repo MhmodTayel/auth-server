@@ -12,10 +12,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     UsersModule,
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService<Config>) => {
-        const jwtConfig = configService.get('jwt', { infer: true });
+        const jwtConfig = configService.get('jwt', { infer: true })!;
         return {
           secret: jwtConfig.secret,
-          signOptions: { expiresIn: jwtConfig.expiresIn },
+          signOptions: { expiresIn: jwtConfig.expiresIn as never },
         };
       },
       inject: [ConfigService],

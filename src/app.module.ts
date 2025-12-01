@@ -15,7 +15,7 @@ import { validate } from './config/env.validation';
   imports: [
     LoggerModule.forRootAsync({
       useFactory: (configService: ConfigService<Config>) => {
-        const appConfig = configService.get('app', { infer: true });
+        const appConfig = configService.get('app', { infer: true })!;
         const isProduction = appConfig.nodeEnv === 'production';
         return {
           pinoHttp: {
@@ -73,7 +73,7 @@ import { validate } from './config/env.validation';
     ]),
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigService<Config>) => {
-        const dbConfig = configService.get('database', { infer: true });
+        const dbConfig = configService.get('database', { infer: true })!;
         return {
           uri: dbConfig.url,
         };
