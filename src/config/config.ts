@@ -14,7 +14,7 @@ export interface Config {
   app: AppConfig;
 }
 
-export default registerAs('config', (): Config => {
+export default registerAs('', (): Config => {
   return {
     database: {
       url: process.env.MONGO_URI || 'mongodb://localhost:27017/authDB',
