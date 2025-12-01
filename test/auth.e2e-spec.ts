@@ -9,7 +9,6 @@ describe('Authentication (e2e)', () => {
   let app: INestApplication;
   let mongoConnection: Connection;
   let jwtToken: string;
-  let userId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -68,7 +67,6 @@ describe('Authentication (e2e)', () => {
           expect(res.body.user.name).toBe('Test User');
           expect(res.body.user).not.toHaveProperty('password');
           jwtToken = res.body.access_token;
-          userId = res.body.user.id;
         });
     });
 
@@ -199,9 +197,7 @@ describe('Authentication (e2e)', () => {
       });
 
       it('should reject request without token', () => {
-        return request(app.getHttpServer())
-          .get('/api/v1/users/me')
-          .expect(401);
+        return request(app.getHttpServer()).get('/api/v1/users/me').expect(401);
       });
 
       it('should reject request with invalid token', () => {
@@ -319,4 +315,3 @@ describe('Authentication (e2e)', () => {
     });
   });
 });
-

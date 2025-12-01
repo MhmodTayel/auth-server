@@ -22,8 +22,8 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  const configService = app.get(ConfigService<Config, true>)
-  const appConfig = configService.get('app', { infer: true })
+  const configService = app.get(ConfigService<Config, true>);
+  const appConfig = configService.get('app', { infer: true });
   const isProduction = appConfig.nodeEnv === 'production';
 
   app.enableCors({
@@ -56,9 +56,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1/docs', app, document, {
-    customSiteTitle: 'Auth API Docs'
+    customSiteTitle: 'Auth API Docs',
   });
 
   await app.listen(appConfig.port ?? 3000);
 }
-bootstrap();
+void bootstrap();

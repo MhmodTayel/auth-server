@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -26,7 +25,7 @@ import {
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
@@ -43,10 +42,15 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing token',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async getProfile(@CurrentUser() user) {
-    const userId = user?.id;
+  async getProfile(
+    @CurrentUser() user: { id: string; email: string; name: string },
+  ) {
+    const userId = user.id;
     return this.usersService.findOne(userId);
   }
 
@@ -66,14 +70,17 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing token',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async updateProfile(
-    @CurrentUser() user,
+    @CurrentUser() user: { id: string; email: string; name: string },
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const userId = user?.id;
+    const userId = user.id;
     return this.usersService.update(userId, updateUserDto);
   }
 
@@ -90,14 +97,20 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized or incorrect current password' })
-  @ApiResponse({ status: 400, description: 'New password must be different from current' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized or incorrect current password',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'New password must be different from current',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async changePassword(
-    @CurrentUser() user,
+    @CurrentUser() user: { id: string; email: string; name: string },
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const userId = user?.id;
+    const userId = user.id;
     return this.usersService.changePassword(userId, changePasswordDto);
   }
 }

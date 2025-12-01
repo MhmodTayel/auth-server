@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Request ,Response } from 'express';
+import { Request, Response } from 'express';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 
 @Catch()
@@ -36,17 +36,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
         method: request.method,
-        error: exception instanceof Error ? exception.message : exception,
+        error:
+          exception instanceof Error ? exception.message : String(exception),
         stack: exception instanceof Error ? exception.stack : undefined,
       },
       'Exception caught',
     );
 
+    const errorMessage =
+      typeof message === 'string'
+        ? message
+        : (message as { message?: string }).message || 'Error occurred';
+
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      error: typeof message === 'string' ? message : (message as any).message || message,
+      error: errorMessage,
       ...(typeof message === 'object' && message !== null ? message : {}),
     });
   }

@@ -21,16 +21,15 @@ export class CreateUserDto {
 
   @ApiProperty({
     example: 'Password123!',
-    description: 'User password (min 8 chars, must contain letter, number, and special character)',
+    description:
+      'User password (min 8 chars, must contain letter, number, and special character)',
     minLength: 8,
   })
   @IsNotEmpty({ message: 'Password is required' })
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  @Matches(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/,
-    {
-      message: 'Password must contain at least one letter, one number, and one special character (@$!%*#?&)',
-    },
-  )
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/, {
+    message:
+      'Password must contain at least one letter, one number, and one special character (@$!%*#?&)',
+  })
   password: string;
 }

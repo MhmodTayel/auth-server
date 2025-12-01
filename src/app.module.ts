@@ -8,37 +8,37 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core'
+import { APP_GUARD } from '@nestjs/core';
 import { validate } from './config/env.validation';
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
-      useFactory: async (configService: ConfigService<Config>) => {
-        const appConfig = configService.get('app')
+      useFactory: (configService: ConfigService<Config>) => {
+        const appConfig = configService.get('app', { infer: true });
         const isProduction = appConfig.nodeEnv === 'production';
         return {
           pinoHttp: {
             transport: isProduction
               ? undefined
               : {
-                target: 'pino-pretty',
-                options: {
-                  colorize: true,
-                  levelFirst: true,
-                  translateTime: 'yyyy-mm-dd HH:MM:ss',
-                  ignore: 'pid,hostname',
-                  singleLine: false,
+                  target: 'pino-pretty',
+                  options: {
+                    colorize: true,
+                    levelFirst: true,
+                    translateTime: 'yyyy-mm-dd HH:MM:ss',
+                    ignore: 'pid,hostname',
+                    singleLine: false,
+                  },
                 },
-              },
             level: isProduction ? 'info' : 'debug',
             serializers: {
-              req: (req) => ({
+              req: (req: { id: string; method: string; url: string }) => ({
                 id: req.id,
                 method: req.method,
                 url: req.url,
               }),
-              res: (res) => ({
+              res: (res: { statusCode: number }) => ({
                 statusCode: res.statusCode,
               }),
             },
@@ -72,21 +72,24 @@ import { validate } from './config/env.validation';
       },
     ]),
     MongooseModule.forRootAsync({
-      useFactory: async (configService: ConfigService<Config>) => {
-        const dbConfig = configService.get('database')
+      useFactory: (configService: ConfigService<Config>) => {
+        const dbConfig = configService.get('database', { infer: true });
         return {
-          uri: dbConfig.url
-        }
+          uri: dbConfig.url,
+        };
       },
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard,
-  }],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -30,7 +30,9 @@ describe('UsersService', () => {
     mockUserModel = jest.fn().mockImplementation((dto) => ({
       ...dto,
       _id: '507f1f77bcf86cd799439011',
-      save: jest.fn().mockResolvedValue({ _id: '507f1f77bcf86cd799439011', ...dto }),
+      save: jest
+        .fn()
+        .mockResolvedValue({ _id: '507f1f77bcf86cd799439011', ...dto }),
     }));
 
     mockUserModel.find = jest.fn();
@@ -97,7 +99,9 @@ describe('UsersService', () => {
         password: 'Password123!',
       };
 
-      service.findOneByEmail = jest.fn().mockResolvedValue({ email: 'existing@example.com' });
+      service.findOneByEmail = jest
+        .fn()
+        .mockResolvedValue({ email: 'existing@example.com' });
 
       await expect(service.create(createUserDto)).rejects.toThrow(
         ConflictException,
@@ -233,7 +237,10 @@ describe('UsersService', () => {
         }),
       });
 
-      const result = await service.update('507f1f77bcf86cd799439011', updateDto);
+      const result = await service.update(
+        '507f1f77bcf86cd799439011',
+        updateDto,
+      );
 
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439011',
@@ -267,7 +274,10 @@ describe('UsersService', () => {
         }),
       });
 
-      const result = await service.update('507f1f77bcf86cd799439011', updateDto);
+      const result = await service.update(
+        '507f1f77bcf86cd799439011',
+        updateDto,
+      );
 
       expect(updateDto.email).toBe('newemail@example.com');
       expect(result).toEqual(mockUpdatedUser);
@@ -326,7 +336,10 @@ describe('UsersService', () => {
         }),
       });
 
-      const result = await service.update('507f1f77bcf86cd799439011', updateDto);
+      const result = await service.update(
+        '507f1f77bcf86cd799439011',
+        updateDto,
+      );
 
       expect(result).toEqual(mockUpdatedUser);
     });
@@ -342,9 +355,9 @@ describe('UsersService', () => {
         }),
       });
 
-      await expect(
-        service.update('nonexistent-id', updateDto),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent-id', updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -1,6 +1,5 @@
 import { registerAs } from '@nestjs/config';
 
-
 interface DatabaseConfig {
   url: string;
 }
@@ -29,7 +28,6 @@ export default registerAs('', (): Config => {
     app: {
       port: parseInt(process.env.PORT || '3000', 10),
       nodeEnv: process.env.NODE_ENV || 'development',
-
     },
     jwt: {
       secret: process.env.JWT_SECRET || 'strong-jwt-secret-edwr543d5fds3axv',

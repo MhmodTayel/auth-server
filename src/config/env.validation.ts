@@ -59,7 +59,7 @@ export function validate(config: Record<string, unknown>) {
 
     throw new Error(
       `\n\n Environment variable validation failed:\n\n${formattedErrors}\n\n` +
-      `Please check your .env file and ensure all required variables are set correctly.\n`,
+        `Please check your .env file and ensure all required variables are set correctly.\n`,
     );
   }
 

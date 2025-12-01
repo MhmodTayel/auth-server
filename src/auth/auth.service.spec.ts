@@ -7,13 +7,10 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { SigninDto } from './dto/signin.dto';
 import * as bcrypt from 'bcrypt';
 
-
 jest.mock('bcrypt');
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
 
   const mockUsersService = {
     create: jest.fn(),

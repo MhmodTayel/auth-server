@@ -18,9 +18,9 @@ import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectPinoLogger(UsersService.name) 
+    @InjectPinoLogger(UsersService.name)
     private readonly logger: PinoLogger,
-  ) { }
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.findOneByEmail(createUserDto.email);
@@ -38,9 +38,15 @@ export class UsersService {
 
     await user.save();
 
-    this.logger.info({ userId: user._id, email: user.email }, 'User created successfully');
+    this.logger.info(
+      { userId: user._id, email: user.email },
+      'User created successfully',
+    );
 
-    return this.userModel.findById(user._id).select('-password').exec() as Promise<User>;
+    return this.userModel
+      .findById(user._id)
+      .select('-password')
+      .exec() as Promise<User>;
   }
 
   async findOne(id: string): Promise<User> {
@@ -59,7 +65,6 @@ export class UsersService {
     try {
       const query = this.userModel.findOne({ email: email.toLowerCase() });
 
-
       if (options.includePassword) {
         query.select('+password');
       } else {
@@ -68,7 +73,13 @@ export class UsersService {
       const user = await query.exec();
       return user;
     } catch (error) {
-      this.logger.error({ error, email }, 'Error finding user by email');
+      this.logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+          email,
+        },
+        'Error finding user by email',
+      );
       throw error;
     }
   }
@@ -98,7 +109,10 @@ export class UsersService {
     userId: string,
     changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    const user = await this.userModel.findById(userId).select('+password').exec();
+    const user = await this.userModel
+      .findById(userId)
+      .select('+password')
+      .exec();
 
     if (!user) {
       this.logger.warn({ userId }, 'Password change failed: User not found');
