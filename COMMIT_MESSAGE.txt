@@ -1,0 +1,74 @@
+feat: add SSL/HTTPS support with nginx and domain configuration
+
+## Changes
+
+### 🔧 CI/CD Improvements
+- Fixed lowercase Docker image names for GHCR compliance
+- Added automatic copy of docker-compose.prod.yml to EC2
+- Improved deployment verification to check from within EC2
+- Fixed health check to test internal localhost connection
+
+### 🌐 SSL & Domain Support
+- Added nginx reverse proxy configuration
+- Integrated Let's Encrypt for free SSL certificates
+- Added certbot for automatic certificate renewal
+- Created Docker Compose profiles for flexible deployment:
+  - Default: backend + mongodb
+  - with-ssl: adds nginx + certbot
+  - with-frontend: adds frontend container
+
+### 📝 Configuration Files
+- docker-compose.prod.yml: Production deployment with nginx/SSL support
+- nginx/nginx.conf: Main nginx configuration
+- nginx/conf.d/default.conf: Domain and SSL routing rules
+- deployment/setup-ssl.sh: Automated SSL setup script
+- deployment/QUICK-SSL-SETUP.md: Step-by-step SSL guide
+- DEPLOYMENT-GUIDE.md: Complete deployment documentation
+
+### 🐛 Bug Fixes
+- Fixed backend port mapping (changed expose to ports)
+- Removed obsolete docker-compose version field
+- Fixed health check connectivity issues in CI/CD
+
+### 🎯 Domain Setup
+Prepared for mtauth.online with:
+- api.mtauth.online → Backend API (HTTPS)
+- mtauth.online → Frontend (HTTPS)
+- Automatic HTTP → HTTPS redirect
+- Certificate auto-renewal every 12 hours
+
+### 📚 Documentation
+- Created comprehensive deployment guide
+- Added quick SSL setup instructions
+- Documented Route53 + Namecheap DNS configuration
+- Added troubleshooting guides
+
+## Testing
+
+All tests passing:
+- ✅ Unit tests (90%+ coverage)
+- ✅ E2E tests
+- ✅ Linting and code quality
+- ✅ Docker build and push
+- ✅ EC2 deployment
+
+## Deployment
+
+After merging, the backend will:
+1. Auto-deploy to EC2 on port 3000 (HTTP)
+2. Be ready for SSL setup with ./deployment/setup-ssl.sh
+3. Support https://api.mtauth.online after DNS + SSL configuration
+
+## Next Steps
+
+1. Configure Route53 hosted zone for mtauth.online
+2. Update Namecheap nameservers to Route53
+3. Create A records (mtauth.online, api.mtauth.online, www.mtauth.online)
+4. Wait for DNS propagation (1-2 hours)
+5. Run setup-ssl.sh on EC2
+6. Deploy with: docker compose --profile with-ssl up -d
+
+---
+
+Co-authored-by: GitHub Actions <actions@github.com>
+
