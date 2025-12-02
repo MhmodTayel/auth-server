@@ -235,20 +235,42 @@ jobs:
             fi
 
       - name: Verify Deployment
-        run: |
-          echo "⏳ Waiting for service to be fully ready..."
-          sleep 10
-          
-          echo "🔍 Testing external endpoint..."
-          if curl -f http://${{ secrets.EC2_HOST }}:3000/api/v1; then
-            echo "✅ Deployment verified successfully!"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            
+            echo "⏳ Waiting for service to be fully ready..."
+            sleep 10
+            
+            cd /home/ubuntu/deployment
+            
+            echo "🔍 Verifying deployment..."
             echo ""
-            echo "🎉 Deployment complete!"
-            echo "📍 Backend API: http://${{ secrets.EC2_HOST }}:3000/api/v1"
-            echo "📚 API Docs: http://${{ secrets.EC2_HOST }}:3000/api/v1/docs"
-          else
-            echo "❌ Deployment verification failed!"
-            echo "Please check EC2 logs: ssh ubuntu@${{ secrets.EC2_HOST }} 'cd /home/ubuntu/deployment && docker compose logs backend'"
-            exit 1
-          fi
+            echo "📊 Container Status:"
+            docker compose ps
+            echo ""
+            
+            echo "🧪 Testing backend health..."
+            if curl -f http://localhost:3000/api/v1; then
+              echo ""
+              echo "✅ Deployment verified successfully!"
+              echo ""
+              echo "🎉 Deployment complete!"
+              echo "📍 Backend API available at:"
+              echo "   - Internal: http://localhost:3000/api/v1"
+              echo "   - External: http://${{ secrets.EC2_HOST }}:3000/api/v1"
+              echo "   - Docs: http://${{ secrets.EC2_HOST }}:3000/api/v1/docs"
+              echo ""
+              echo "💡 To enable HTTPS with domain, run: ./deployment/setup-ssl.sh"
+            else
+              echo ""
+              echo "❌ Health check failed!"
+              echo "📋 Recent backend logs:"
+              docker compose logs --tail=50 backend
+              exit 1
+            fi
 
