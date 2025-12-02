@@ -173,6 +173,15 @@ jobs:
       - name: Checkout code for deployment files
         uses: actions/checkout@v4
 
+      - name: Copy docker-compose.prod.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/ubuntu/deployment/"
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -186,6 +195,10 @@ jobs:
             
             # Navigate to deployment directory
             cd /home/ubuntu/deployment
+            
+            # Use production docker-compose file
+            echo "📝 Using production docker-compose configuration..."
+            cp docker-compose.prod.yml docker-compose.yml
             
             # Create necessary directories
             echo "📁 Creating directories..."
