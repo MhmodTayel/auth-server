@@ -2,10 +2,26 @@
 
 > A modern, production-ready authentication backend built with NestJS, MongoDB, and TypeScript. Featuring comprehensive testing, CI/CD automation, and Docker containerization.
 
+<div align="center">
+
+### 🌐 Live Demo
+
+|                 | URL                                                                            |
+| --------------- | ------------------------------------------------------------------------------ |
+| 🖥️ **Frontend** | [https://mtauth.online](https://mtauth.online)                                 |
+| 🔌 **API**      | [https://api.mtauth.online/api/v1](https://api.mtauth.online/api/v1)           |
+| 📚 **API Docs** | [https://api.mtauth.online/api/v1/docs](https://api.mtauth.online/api/v1/docs) |
+
+</div>
+
+---
+
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/MhmodTayel/auth-server/ci-cd.yml?branch=master&label=CI%2FCD&logo=github)](https://github.com/MhmodTayel/auth-client/actions)
 [![Tests](https://img.shields.io/badge/tests-66%20passing-success)](.)
 [![Coverage](https://img.shields.io/badge/coverage-62.84%25-yellow)](.)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](.)
 [![Node](https://img.shields.io/badge/node-18%20%7C%2020-green)](.)
+[![Deployed](https://img.shields.io/badge/deployed-mtauth.online-brightgreen)](https://mtauth.online)
 
 ---
 
@@ -22,8 +38,8 @@ API Docs        →  Interactive Swagger UI with live testing
 Security        →  Helmet, CORS, rate limiting, input validation
 Logging         →  Pino structured logging with request tracking
 Testing         →  42 unit + 24 E2E tests with 62.84% coverage
-CI/CD           →  GitHub Actions with automated testing & builds
-Deployment      →  Docker + Docker Compose for easy deployment
+CI/CD           →  GitHub Actions with automated testing & deployment
+Deployment      →  Docker + nginx + SSL on AWS EC2
 ```
 
 ---
@@ -100,11 +116,12 @@ JWT_EXPIRES_IN=7d            # Token lifetime: 1d, 7d, 24h, etc.
 
 ## 📡 API Reference
 
-### Base URL
+### Base URLs
 
-```
-http://localhost:3000/api/v1
-```
+| Environment | URL                                |
+| ----------- | ---------------------------------- |
+| Production  | `https://api.mtauth.online/api/v1` |
+| Local       | `http://localhost:3000/api/v1`     |
 
 ### Endpoints Overview
 
@@ -119,7 +136,7 @@ http://localhost:3000/api/v1
 
 ### 📖 Interactive Documentation
 
-Visit **`http://localhost:3000/api/v1/docs`** for Swagger UI with:
+Visit **[https://api.mtauth.online/api/v1/docs](https://api.mtauth.online/api/v1/docs)** for Swagger UI with:
 
 - Live API testing
 - Request/response schemas
@@ -404,31 +421,224 @@ chore: update dependencies
 
 ## 🔄 CI/CD Pipeline
 
-### GitHub Actions Workflow
+### Automated Pipeline
 
-Runs automatically on push/PR:
+The project uses GitHub Actions for complete CI/CD automation:
 
-1. **Linting** ✨
-   - ESLint code quality
-   - Prettier formatting check
-   - Commit message validation
+```
+Push to main
+    ↓
+┌─────────────────────────────────────────────────────────┐
+│                   GitHub Actions                         │
+├─────────────────────────────────────────────────────────┤
+│  1. Lint & Code Quality                                  │
+│     └─ ESLint, Prettier, Commitlint                      │
+│                                                          │
+│  2. Unit Tests (Node 18.x & 20.x)                        │
+│     └─ Jest with coverage → Codecov                      │
+│                                                          │
+│  3. E2E Tests                                            │
+│     └─ Full integration with MongoDB                     │
+│                                                          │
+│  4. Build & Push Docker Image                            │
+│     └─ Multi-stage build → ghcr.io                       │
+│                                                          │
+│  5. Deploy to EC2                                        │
+│     └─ SSH → Pull image → Restart services               │
+└─────────────────────────────────────────────────────────┘
+    ↓
+Live at https://api.mtauth.online
+```
 
-2. **Unit Tests** 🧪
-   - Run on Node 18.x & 20.x
-   - Generate coverage reports
-   - Upload to Codecov
+### Pipeline Features
 
-3. **E2E Tests** 🔗
-   - MongoDB container setup
-   - Full integration testing
-   - Real database operations
+- ✅ **Matrix Testing** - Node 18.x and 20.x
+- ✅ **Coverage Reports** - Upload to Codecov
+- ✅ **Docker Layer Caching** - Fast rebuilds
+- ✅ **Lowercase Image Names** - GHCR compatibility
+- ✅ **Health Checks** - Post-deployment verification
+- ✅ **Auto-renewal** - SSL certificates via certbot
 
-4. **Build** 📦
-   - TypeScript compilation
-   - Production build verification
-   - Artifact creation
+---
 
-All jobs must pass before merging ✅
+## 🚢 Production Deployment
+
+### Live Infrastructure
+
+The application is deployed on AWS EC2 with the following architecture:
+
+```
+                    ┌─────────────────────────────────────┐
+                    │           mtauth.online             │
+                    └────────────────┬────────────────────┘
+                                     │
+                    ┌────────────────▼────────────────────┐
+                    │         AWS Route53 (DNS)           │
+                    │  mtauth.online → 23.23.36.230       │
+                    │  api.mtauth.online → 23.23.36.230   │
+                    └────────────────┬────────────────────┘
+                                     │
+                    ┌────────────────▼────────────────────┐
+                    │           EC2 Instance              │
+                    │     (Ubuntu + Docker Compose)       │
+                    └────────────────┬────────────────────┘
+                                     │
+         ┌───────────────────────────┼───────────────────────────┐
+         │                           │                           │
+         ▼                           ▼                           ▼
+┌─────────────────┐       ┌──────────────────┐       ┌─────────────────┐
+│     nginx       │       │     certbot      │       │    MongoDB      │
+│   (port 80/443) │       │  (SSL renewal)   │       │  (port 27017)   │
+│   + SSL/HTTPS   │       │                  │       │                 │
+└────────┬────────┘       └──────────────────┘       └────────▲────────┘
+         │                                                     │
+         ├──────────────────────────┬──────────────────────────┤
+         │                          │                          │
+         ▼                          ▼                          │
+┌─────────────────┐       ┌──────────────────┐                │
+│    Frontend     │       │     Backend      │────────────────┘
+│    (port 80)    │       │   (port 3000)    │
+│   React App     │       │   NestJS API     │
+└─────────────────┘       └──────────────────┘
+```
+
+### Domain Configuration
+
+| Domain              | Service          | SSL              |
+| ------------------- | ---------------- | ---------------- |
+| `mtauth.online`     | Frontend (React) | ✅ Let's Encrypt |
+| `www.mtauth.online` | Frontend (React) | ✅ Let's Encrypt |
+| `api.mtauth.online` | Backend (NestJS) | ✅ Let's Encrypt |
+
+### Docker Services
+
+```yaml
+# Production services (docker-compose.prod.yml)
+services:
+  mongodb       # MongoDB 7.x database
+  backend       # NestJS API (ghcr.io/mhmodtayel/auth-server)
+  frontend      # React app (ghcr.io/mhmodtayel/auth-client)
+  nginx         # Reverse proxy + SSL termination
+  certbot       # SSL certificate auto-renewal
+```
+
+### Quick Setup (New EC2 Instance)
+
+1. **Prepare EC2 Instance**
+
+   ```bash
+   # SSH to EC2
+   ssh -i your-key.pem ubuntu@your-ec2-ip
+
+   # Install Docker & Docker Compose
+   curl -fsSL https://get.docker.com | sh
+   sudo usermod -aG docker ubuntu
+
+   # Logout and login again
+   exit
+   ssh -i your-key.pem ubuntu@your-ec2-ip
+
+   # Create deployment directory
+   mkdir -p /home/ubuntu/deployment
+   cd /home/ubuntu/deployment
+   ```
+
+2. **Configure GitHub Secrets**
+
+   Add these in **Settings → Secrets → Actions**:
+
+   | Secret        | Value                                        |
+   | ------------- | -------------------------------------------- |
+   | `EC2_HOST`    | Your EC2 public IP                           |
+   | `EC2_USER`    | `ubuntu`                                     |
+   | `EC2_SSH_KEY` | Your EC2 private key (entire `.pem` content) |
+
+3. **Create .env on EC2**
+
+   ```bash
+   # On EC2: /home/ubuntu/deployment/.env
+   cat > .env << 'EOF'
+   NODE_ENV=production
+   MONGO_USERNAME=admin
+   MONGO_PASSWORD=your-secure-password
+   MONGO_DATABASE=auth
+   JWT_SECRET=your-32-char-minimum-secret-key-here
+   JWT_EXPIRES_IN=7d
+   BACKEND_IMAGE=ghcr.io/mhmodtayel/auth-server:latest
+   FRONTEND_IMAGE=ghcr.io/mhmodtayel/auth-client:latest
+   API_URL=https://api.mtauth.online/api/v1
+   EOF
+   ```
+
+4. **Deploy**
+
+   ```bash
+   # Push to main branch
+   git push origin main
+   # GitHub Actions handles the rest!
+   ```
+
+### SSL Setup (One-time)
+
+After configuring DNS in Route53:
+
+```bash
+# On EC2
+cd /home/ubuntu/deployment
+
+# Request SSL certificates
+docker compose --profile with-ssl run --rm \
+  --entrypoint certbot certbot certonly \
+  --webroot --webroot-path=/var/www/certbot \
+  --email your-email@example.com \
+  --agree-tos --no-eff-email \
+  -d mtauth.online -d www.mtauth.online
+
+docker compose --profile with-ssl run --rm \
+  --entrypoint certbot certbot certonly \
+  --webroot --webroot-path=/var/www/certbot \
+  --email your-email@example.com \
+  --agree-tos --no-eff-email \
+  -d api.mtauth.online
+
+# Start with SSL
+docker compose --profile with-ssl --profile with-frontend up -d
+```
+
+### Manual Deployment
+
+```bash
+# On EC2
+cd /home/ubuntu/deployment
+
+# Login to GHCR
+echo "YOUR_TOKEN" | docker login ghcr.io -u YOUR_USERNAME --password-stdin
+
+# Pull latest images
+docker pull ghcr.io/mhmodtayel/auth-server:latest
+docker pull ghcr.io/mhmodtayel/auth-client:latest
+
+# Restart services
+docker compose --profile with-ssl --profile with-frontend up -d
+
+# Check status
+docker compose ps
+```
+
+### Production Checklist
+
+- [x] Set strong `JWT_SECRET` (min 32 characters)
+- [x] Configure MongoDB authentication
+- [x] SSL/TLS certificates (Let's Encrypt)
+- [x] Configure CORS for frontend domain
+- [x] Set `NODE_ENV=production`
+- [x] Rate limiting enabled
+- [x] nginx reverse proxy
+- [x] Auto-renewal for SSL certificates
+- [x] CI/CD pipeline working
+- [ ] Set up log aggregation (optional)
+- [ ] Configure monitoring/alerts (optional)
+- [ ] Back up database regularly
 
 ---
 
@@ -452,99 +662,6 @@ All jobs must pass before merging ✅
 - **HTTP**: `GET /api/v1` returns `200 OK` with timestamp
 - **Docker**: Built-in container health monitoring
 - **Database**: Connection verification on startup
-
----
-
-## 🚢 Production Deployment
-
-### Automated Deployment to EC2
-
-This project includes automated CI/CD deployment to AWS EC2 using GitHub Actions and GitHub Container Registry (GHCR).
-
-**Deployment Flow:**
-
-```
-Push to main → Tests → Build Docker Image → Push to GHCR → Deploy to EC2
-```
-
-### Quick Setup
-
-1. **Prepare EC2 Instance**
-
-   ```bash
-   # SSH to EC2
-   ssh -i your-key.pem ubuntu@your-ec2-ip
-
-   # Install Docker & Docker Compose
-   curl -fsSL https://get.docker.com | sh
-   sudo usermod -aG docker ubuntu
-
-   # Create deployment directory
-   mkdir -p /home/ubuntu/deployment
-   cd /home/ubuntu/deployment
-   ```
-
-2. **Configure GitHub Secrets**
-
-   Add these in **Settings → Secrets → Actions**:
-   - `EC2_HOST` - Your EC2 public IP
-   - `EC2_USER` - `ubuntu`
-   - `EC2_SSH_KEY` - Your EC2 private key (entire `.pem` file content)
-
-3. **Create .env on EC2**
-
-   ```bash
-   # On EC2: /home/ubuntu/deployment/.env
-   MONGO_USERNAME=admin
-   MONGO_PASSWORD=your-secure-password
-   MONGO_DATABASE=auth
-   JWT_SECRET=your-32-char-secret-key
-   JWT_EXPIRES_IN=7d
-   ```
-
-4. **Deploy**
-   ```bash
-   # Push to main branch
-   git push origin main
-   # GitHub Actions handles the rest!
-   ```
-
-### Manual Deployment
-
-```bash
-# On EC2
-cd /home/ubuntu/deployment
-
-# Pull latest image
-docker login ghcr.io
-docker pull ghcr.io/mhmodtayel/auth-server:latest
-
-# Update and restart
-export BACKEND_IMAGE=ghcr.io/mhmodtayel/auth-server:latest
-docker compose up -d backend
-```
-
-### Production Checklist
-
-- [ ] Set strong `JWT_SECRET` (min 32 characters)
-- [ ] Configure MongoDB authentication
-- [ ] Set up SSL/TLS certificates (Let's Encrypt)
-- [ ] Configure CORS for your frontend domain
-- [ ] Set `NODE_ENV=production`
-- [ ] Review rate limits
-- [ ] Set up log aggregation
-- [ ] Configure monitoring/alerts
-- [ ] Back up database regularly
-- [ ] Test deployment pipeline
-
-### Scaling
-
-This application is **stateless** and **horizontally scalable**:
-
-- Deploy multiple instances behind a load balancer
-- JWT tokens eliminate session storage
-- MongoDB supports replica sets & sharding
-- Consider Redis for caching (optional)
 
 ---
 
@@ -603,6 +720,21 @@ npm test
 npm run prepare
 ```
 
+**SSL Certificate Issues**
+
+```bash
+# On EC2
+cd /home/ubuntu/deployment
+
+# Check certificate status
+docker compose --profile with-ssl run --rm \
+  --entrypoint certbot certbot certificates
+
+# Force renewal
+docker compose --profile with-ssl run --rm \
+  --entrypoint certbot certbot renew --force-renewal
+```
+
 ---
 
 ## 📝 License
@@ -620,10 +752,14 @@ Built with:
 - [Passport](http://www.passportjs.org/) - Authentication middleware
 - [Swagger](https://swagger.io/) - API documentation
 - [Docker](https://www.docker.com/) - Containerization
+- [nginx](https://nginx.org/) - Reverse proxy
+- [Let's Encrypt](https://letsencrypt.org/) - Free SSL certificates
 
 ---
 
 <div align="center">
+
+**🌐 Live at [mtauth.online](https://mtauth.online)**
 
 **Made with ❤️ and TypeScript**
 
