@@ -170,6 +170,9 @@ jobs:
         run: |
           echo "IMAGE_NAME_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+      - name: Checkout code for deployment files
+        uses: actions/checkout@v4
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -183,6 +186,12 @@ jobs:
             
             # Navigate to deployment directory
             cd /home/ubuntu/deployment
+            
+            # Create necessary directories
+            echo "📁 Creating directories..."
+            mkdir -p nginx/conf.d
+            mkdir -p certbot/www
+            mkdir -p certbot/conf
             
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -198,7 +207,7 @@ jobs:
               echo "BACKEND_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest" >> .env
             fi
             
-            # Restart backend service
+            # Restart backend service (skip nginx if not configured yet)
             echo "🔄 Restarting backend service..."
             docker compose up -d backend
             
@@ -216,8 +225,14 @@ jobs:
             echo "⏳ Waiting for service health check..."
             sleep 5
             
-            # Test backend health
-            curl -f http://localhost:3000/api/v1 || echo "⚠️  Warning: Health check failed"
+            # Test backend health (via nginx if available, otherwise direct)
+            if docker compose ps | grep -q nginx; then
+              echo "Testing via nginx..."
+              curl -f http://localhost:80/api/v1 || curl -f http://localhost:3000/api/v1 || echo "⚠️  Warning: Health check failed"
+            else
+              echo "Testing directly..."
+              curl -f http://localhost:3000/api/v1 || echo "⚠️  Warning: Health check failed"
+            fi
 
       - name: Verify Deployment
         run: |
