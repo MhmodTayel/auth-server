@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
   lint:
@@ -122,6 +122,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set lowercase image name
+        run: |
+          echo "IMAGE_NAME_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -136,7 +140,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
@@ -162,83 +166,74 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create deployment script
+      - name: Set lowercase image name
         run: |
-          cat > deploy.sh << 'EOF'
-          #!/bin/bash
-          set -e
+          echo "IMAGE_NAME_LOWER=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-          echo "🚀 Starting backend deployment..."
-
-          # Navigate to deployment directory
-          cd /home/ubuntu/deployment
-
-          # Login to GitHub Container Registry
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-          # Pull latest backend image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-          # Update backend service in docker-compose
-          export BACKEND_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          
-          # Check if docker-compose.yml exists
-          if [ ! -f docker-compose.yml ]; then
-            echo "⚠️  docker-compose.yml not found, creating from template..."
-            # This will be created in the setup step
-          fi
-
-          # Restart backend service
-          docker compose up -d backend
-
-          # Clean up old images
-          docker image prune -af --filter "until=24h"
-
-          echo "✅ Backend deployment completed!"
-          
-          # Show running containers
-          docker compose ps
-          EOF
-          chmod +x deploy.sh
-
-      - name: Copy deployment script to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "deploy.sh"
-          target: "/home/ubuntu/deployment"
-
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+            
+            echo "🚀 Starting backend deployment..."
+            
+            # Navigate to deployment directory
             cd /home/ubuntu/deployment
-            chmod +x deploy.sh
-            ./deploy.sh
+            
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Pull latest backend image (lowercase)
+            echo "📥 Pulling latest image..."
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
+            
+            # Update .env with new image
+            if grep -q "BACKEND_IMAGE=" .env; then
+              sed -i "s|BACKEND_IMAGE=.*|BACKEND_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest|" .env
+            else
+              echo "BACKEND_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest" >> .env
+            fi
+            
+            # Restart backend service
+            echo "🔄 Restarting backend service..."
+            docker compose up -d backend
+            
+            # Clean up old images
+            echo "🧹 Cleaning up old images..."
+            docker image prune -af --filter "until=24h" || true
+            
+            echo "✅ Backend deployment completed!"
+            
+            # Show status
+            echo "📊 Service status:"
+            docker compose ps
+            
+            # Wait for service to be ready
+            echo "⏳ Waiting for service health check..."
+            sleep 5
+            
+            # Test backend health
+            curl -f http://localhost:3000/api/v1 || echo "⚠️  Warning: Health check failed"
 
-      - name: Health check
+      - name: Verify Deployment
         run: |
-          echo "Waiting for service to be ready..."
+          echo "⏳ Waiting for service to be fully ready..."
           sleep 10
-          curl -f http://${{ secrets.EC2_HOST }}/api/v1 || exit 1
-          echo "✅ Health check passed!"
-
-      - name: Deployment notification
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful!"
-            echo "Backend: http://${{ secrets.EC2_HOST }}/api/v1"
-            echo "Docs: http://${{ secrets.EC2_HOST }}/api/v1/docs"
+          
+          echo "🔍 Testing external endpoint..."
+          if curl -f http://${{ secrets.EC2_HOST }}:3000/api/v1; then
+            echo "✅ Deployment verified successfully!"
+            echo ""
+            echo "🎉 Deployment complete!"
+            echo "📍 Backend API: http://${{ secrets.EC2_HOST }}:3000/api/v1"
+            echo "📚 API Docs: http://${{ secrets.EC2_HOST }}:3000/api/v1/docs"
           else
-            echo "❌ Deployment failed!"
+            echo "❌ Deployment verification failed!"
+            echo "Please check EC2 logs: ssh ubuntu@${{ secrets.EC2_HOST }} 'cd /home/ubuntu/deployment && docker compose logs backend'"
+            exit 1
           fi
 

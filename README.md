@@ -457,17 +457,85 @@ All jobs must pass before merging ✅
 
 ## 🚢 Production Deployment
 
-### Checklist
+### Automated Deployment to EC2
+
+This project includes automated CI/CD deployment to AWS EC2 using GitHub Actions and GitHub Container Registry (GHCR).
+
+**Deployment Flow:**
+
+```
+Push to main → Tests → Build Docker Image → Push to GHCR → Deploy to EC2
+```
+
+### Quick Setup
+
+1. **Prepare EC2 Instance**
+
+   ```bash
+   # SSH to EC2
+   ssh -i your-key.pem ubuntu@your-ec2-ip
+
+   # Install Docker & Docker Compose
+   curl -fsSL https://get.docker.com | sh
+   sudo usermod -aG docker ubuntu
+
+   # Create deployment directory
+   mkdir -p /home/ubuntu/deployment
+   cd /home/ubuntu/deployment
+   ```
+
+2. **Configure GitHub Secrets**
+
+   Add these in **Settings → Secrets → Actions**:
+   - `EC2_HOST` - Your EC2 public IP
+   - `EC2_USER` - `ubuntu`
+   - `EC2_SSH_KEY` - Your EC2 private key (entire `.pem` file content)
+
+3. **Create .env on EC2**
+
+   ```bash
+   # On EC2: /home/ubuntu/deployment/.env
+   MONGO_USERNAME=admin
+   MONGO_PASSWORD=your-secure-password
+   MONGO_DATABASE=auth
+   JWT_SECRET=your-32-char-secret-key
+   JWT_EXPIRES_IN=7d
+   ```
+
+4. **Deploy**
+   ```bash
+   # Push to main branch
+   git push origin main
+   # GitHub Actions handles the rest!
+   ```
+
+### Manual Deployment
+
+```bash
+# On EC2
+cd /home/ubuntu/deployment
+
+# Pull latest image
+docker login ghcr.io
+docker pull ghcr.io/mhmodtayel/auth-server:latest
+
+# Update and restart
+export BACKEND_IMAGE=ghcr.io/mhmodtayel/auth-server:latest
+docker compose up -d backend
+```
+
+### Production Checklist
 
 - [ ] Set strong `JWT_SECRET` (min 32 characters)
 - [ ] Configure MongoDB authentication
-- [ ] Set up SSL/TLS certificates
-- [ ] Configure CORS for your domain
+- [ ] Set up SSL/TLS certificates (Let's Encrypt)
+- [ ] Configure CORS for your frontend domain
 - [ ] Set `NODE_ENV=production`
 - [ ] Review rate limits
 - [ ] Set up log aggregation
 - [ ] Configure monitoring/alerts
 - [ ] Back up database regularly
+- [ ] Test deployment pipeline
 
 ### Scaling
 

@@ -25,7 +25,7 @@ services:
 
   # Backend API (This image will be pulled from GHCR)
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/MhmodTayel/auth-server:latest}
+    image: ${BACKEND_IMAGE:-ghcr.io/mhmodtayel/auth-server:latest}
     container_name: auth-backend-prod
     restart: always
     ports:
@@ -50,7 +50,7 @@ services:
 
   # Frontend React App (Will be added when frontend deploys)
   frontend:
-    image: ${FRONTEND_IMAGE:-ghcr.io/MhmodTayel/auth-frontend:latest}
+    image: ${FRONTEND_IMAGE:-ghcr.io/mhmodtayel/auth-frontend:latest}
     container_name: auth-frontend-prod
     restart: always
     ports:
