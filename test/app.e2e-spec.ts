@@ -13,7 +13,6 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // Apply same configuration as main.ts
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({

@@ -28,7 +28,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: isProduction
-      ? ['https://productiondomain.com'] //TODO
+      ? ['https://mtauth.online']
       : ['http://localhost:3000', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,

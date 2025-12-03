@@ -17,7 +17,6 @@ describe('Authentication (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // Apply same configuration as main.ts
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
@@ -33,7 +32,6 @@ describe('Authentication (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
     await mongoConnection.dropDatabase();
     await app.close();
   });
